@@ -1,32 +1,34 @@
 module shift (
-    input a[8],
-    input b[8],
-    input mux[2],
-    output out[8]
+    input a[8], //input an 8-bit number a;
+    input b[8], //input an 8-bit number b;
+    input mux[2], //input a 2-bit number mux;
+    output out[8] //output an 8-bit number out;
   ) {
-  shl shl;
-  shr shr;
-  sra sra;
-  sig result[8];
+  
+  shl shl; //create shl module;
+  shr shr; //create shr module;
+  sra sra; //create sra module;
+  sig result[8]; // define an 8-bit signal result;
   
   always {
-    result=24h00;
     
-    shl.a=a;
-    shl.b=b;
     
-    shr.a=a;
-    shr.b=b;
+    shl.a=a; // input a of shl =a;
+    shl.b=b; // input b of shl =b;
     
-    sra.a=a;
-    sra.b=b;
+    shr.a=a; // input a of shr =a;
+    shr.b=b; // input b of shr =b;
+    
+    sra.a=a; // input a of sra =a;
+    sra.b=b; // input b of sra =b;
     
     
     case(mux){
-      0:result=shl.out;
-      1:result=shr.out;
-      2:result=sra.out;
-      default:result=0;}
+      0:result=shl.out; //if mux=0(2b00),output is the output of shl;
+      1:result=shr.out; //if mux=1(2b01),output is the output of shr;
+      3:result=sra.out; //if mux=3(2b11),output is the output of sra;
+      default:result=0; //in other cases, result is 0;
+        }
   
       
     out=result;

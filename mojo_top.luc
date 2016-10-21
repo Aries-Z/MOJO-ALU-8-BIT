@@ -28,16 +28,15 @@ module mojo_top (
    .rst(rst) {
     
       
-      dff counter[30]; //counter used to cycle through different states      
-     //defining state machine states
-      fsm state = {IDLE, ADDERTEST1,ADDERTEST1A, ADDERTEST2A,ADDERTEST2,ADDERTEST3,ADDERTEST4,ADDERERRORTEST, ADDERERROR,
+      dff counter[25]; //counter used to cycle through different states  
+      fsm state = {IDLE, ADDERTEST1,ADDERTEST2,ADDERTEST3,ADDERTEST4,ADDERERRORTEST, ADDERERROR,
       BOOLEANTEST1, BOOLEANTEST2,BOOLEANTEST3, BOOLEANTEST4, BOOLEANERRORTEST,BOOLEANERROR, 
         SHIFTTEST1,SHIFTTEST2,SHIFTTEST3, SHIFTERRORTEST,SHIFTERROR,
         COMPTEST1, COMPTEST2,COMPTEST3,COMPTEST4,COMPTEST5,COMPTEST6,COMPTEST7, COMPERRORTEST, COMPERROR, END};
-    }}
+    }} //defining state machine states
   
-  alu alu;
-  const X = 29;
+  alu alu; //create alu module;
+  const X = 24;
   sig out[8];
   
   
@@ -57,129 +56,86 @@ module mojo_top (
     io_seg = 8hff;          // turn segments off
     io_sel = 4hf;           // select no digits
     
-    alu.a=io_dip[0];
-    alu.b=io_dip[1];
-    alu.alufn=io_dip[2][5:0];
+    alu.a=io_dip[0]; //input a of alu is first 8 switches of IO sheild;
+    alu.b=io_dip[1]; //input b of alu is second 8 switches of IO sheild;
+    alu.alufn=io_dip[2][5:0]; //input alufn of alu is third 6 switches of IO sheild;
     
-    io_led[0]=io_dip[0];
-    io_led[1]=io_dip[1];
-    io_led[2]=alu.out;
+    io_led[0]=io_dip[0]; // first 8 led display the input a of alu;
+    io_led[1]=io_dip[1]; // second 8 led display  the input b of alu;
+    io_led[2]=alu.out; // third 8 led display  the output of alu;
     
-    case (state.q) {  
+    case (state.q) {
       state.IDLE: //normal functioning alu (without test)
       counter.d = 0; //clock counter is 0 when in idle state
         if (io_button[1] == 1){ //pressing "CENTER" button initiates transition to TEST states
           state.d = state.ADDERTEST1; //transition to testing the alu
         }
         
-      state.ADDERTEST1: // ADDER Test case 1(ADD): 5+5 = 10
+      state.ADDERTEST1: // ADDER Test case 1(ADD): 2+2= 4
       alu.alufn = 6b0; //selects addition operation of alu
-      alu.a = 8b111; //input a = 7
-      alu.b = 8b111; //input a = 7
-      out = alu.out; //assigns output of alu module to output of mojo
-      io_led[1] = 8b111; //center 8 leds display 8 bits of input b
-      io_led[0] = 8b111; //right 8 leds display 8 bits of input a
+      alu.a = 8b10;//input a = 2
+      alu.b = 8b10;//input a = 2
+      out = alu.out; //assigns output of alu to output of mojo
+      io_led[0] = 8b10; //first 8 leds display input a
+      io_led[1] = 8b10; //second 8 leds display input b
       counter.d = counter.q+1; //continually increases clock counter until delay time is over
-        if (counter.q[X]==1&&out==8b1110){ //once counter reaches defined value, and output of ALU is equal to manually calculated value (CORRECT ANSWER)
+        if (counter.q[X]==1&&out==8b100){ //once counter reaches defined value, and output of alu is equal to manually calculated value (CORRECT ANSWER)
           counter.d = 0; //reset counter value to 0
-          state.d = state.ADDERTEST1A; //move on to next test case
-        }else if (counter.q[X] == 1 && out!= 8b1110){ //once counter reachse defined value but output of value is not equal to calculated value (WRONG ANSWER)
+          state.d = state.ADDERTEST2; //move on to next test case
+        }else if (counter.q[X] == 1 && out!= 8b100){ //once counter reachse defined value but output of value is not equal to calculated value (WRONG ANSWER)
           counter.d=0; //reset counter value to 0
           state.d=state.ADDERERROR;} //move to adder error state
        
         
-      state.ADDERTEST1A: // ADDER Test case 1A(ADD OVERFLOW): 81+80=161 (overflow) 8b10000001
-      alu.alufn = 6b0; 
-      alu.a = 8b1010001;
-      alu.b = 8b1010000;
-      out = alu.out;
-      io_led[1] = 8b1010000;
-      io_led[0] = 8b1010001;
-      
-      counter.d = counter.q+1;
-        if (counter.q[X] ==1&&out==8b10100001){
-          counter.d = 0;
-          state.d = state.ADDERTEST2;
-        }else if (counter.q[X] == 1 && out!= 8b10100001){
-          counter.d=0;
-          state.d=state.ADDERERROR;}
+    
           
-        state.ADDERTEST2A: //ADDER Test case 2(SUB OVERFLOW): -74 - 70 = -144 (OVERFLOW)
+        state.ADDERTEST2://ADDER Test case 3(SUB): 10-5 = 5
       alu.alufn = 6b1; 
-      alu.a = 8b10110110;
-      alu.b = 8b1000110;
-      out = alu.out;    
-      io_led[1] = 8b1000110;
-      io_led[0] = 8b10110110;
+      alu.a = 8b1010;
+      alu.b = 8b101;
+      out = alu.out;   
+      io_led[0] = 8b1010;
+      io_led[1] = 8b101; 
       
       counter.d = counter.q+1;
-        if (counter.q[X] ==1&&out==8b01110000){
+        if (counter.q[X] ==1&&out==8b101){
           counter.d = 0;
           state.d = state.ADDERTEST3;
-        }
-          
-        state.ADDERTEST2://ADDER Test case 3(SUB): 100-50 = 50
-      alu.alufn = 6b1; 
-      alu.a = 8b1100100;
-      alu.b = 8b0110010;
-      out = alu.out;   
-      io_led[1] = 8b0110010;
-      io_led[0] = 8b1100100; 
-      
-      counter.d = counter.q+1;
-        if (counter.q[X] ==1&&out==8b110010){
-          counter.d = 0;
-          state.d = state.ADDERTEST2A;
-        }else if (counter.q[X] == 1 && out!= 8b110010){
+        }else if (counter.q[X] == 1 && out!= 8b101){
           counter.d=0;
           state.d=state.ADDERERROR;}
-        
  
         
-     state.ADDERTEST2A: //ADDER Test case 7(MUL): 17*2 =34
-      alu.alufn = 6b10; 
-      alu.a = 8b10001;
-      alu.b = 8b10;
-      out = alu.out; 
-      io_led[1] = 8b10001;
-      io_led[0] = 8b10;
-     
-      counter.d = counter.q+1;
-        if (counter.q[X] ==1&&out==8b100010){
-          counter.d = 0;
-          state.d = state.ADDERTEST3;
-        }
-        
-      state.ADDERTEST3: //ADDER Test case 8(MUL): 5*6 =30
+      state.ADDERTEST3: //ADDER Test case 8(MUL): 5*2 =10
       alu.alufn = 6b10; 
       alu.a = 8b101;
-      alu.b = 8b110;
+      alu.b = 8b10;
       out = alu.out; 
-      io_led[1] = 8b110;
       io_led[0] = 8b101;
+      io_led[1] = 8b10;
        
       counter.d = counter.q+1;
-        if (counter.q[X] ==1&&out==8b11110){
+        if (counter.q[X] ==1&&out==8b1010){
           counter.d = 0;
           state.d = state.ADDERERRORTEST;
-        }else if (counter.q[X] == 1 && out!= 8b11110){
+        }else if (counter.q[X] == 1 && out!= 8b10100){
           counter.d=0;
           state.d=state.ADDERERROR;}
      
         
-      state.ADDERERRORTEST://Simulated ADDER error test case: 5+16=21 (+1)
+      state.ADDERERRORTEST://Simulated ADDER error test case: 4+7=!12 
       alu.alufn = 6b0; 
-      alu.a = 8b101;
-      alu.b = 8b10000;
+      alu.a = 8b100;
+      alu.b = 8b111;
       out = alu.out+1; //adding 1 to output of adder to create incorrect result
-      io_led[1] = 8b111;
-      io_led[0] = 8b10000;    
+      io_led[0] = 8b100;
+      io_led[1] = 8b111;    
       
       counter.d = counter.q+1;
-        if (counter.q[X] ==1&&out==8b10111){ //if result is correct, move on to next test case
+        if (counter.q[X] ==1&&out==8b1011){ //if result is correct, move on to next test case
           counter.d = 0;
           state.d = state.BOOLEANTEST1;}
-        else if (counter.q[X] == 1 && out!= 8b10111){ //else move to adder error state
+        else if (counter.q[X] == 1 && out!= 8b1011){ //else move to adder error state
           counter.d=0;
           state.d=state.ADDERERROR;}
       
@@ -193,78 +149,78 @@ module mojo_top (
           state.d = state.BOOLEANTEST1;} //move to test the next unit
         
         
-      state.BOOLEANTEST1: //BOOLEAN Test case 1(AND): 8b10110100 && 8b11101101 = 8b10100100
+      state.BOOLEANTEST1: //BOOLEAN Test case 1(AND): 8b10101100  & 8b10001100 = 8b10001100
       alu.alufn = 6b11000; 
-      alu.a = 8b10110100;
-      alu.b = 8b11101101;
+      alu.a = 8b10101100;
+      alu.b = 8b10001100;
       out = alu.out; 
-      io_led[1] = 8b11101101;
-      io_led[0] = 8b10110100;
+      io_led[0] = 8b10101100;
+      io_led[1] = 8b10001100;
         
       counter.d = counter.q+1;
-        if (counter.q[X] ==1&&out==8b10100100){
+        if (counter.q[X] ==1&&out==8b10001100){
           counter.d = 0;
           state.d = state.BOOLEANTEST2;
-        }else if (counter.q[X] == 1 && out!= 8b10100100){
+        }else if (counter.q[X] == 1 && out!= 8b10001100){
           counter.d=0;
           state.d=state.BOOLEANERROR;}
         
-      state.BOOLEANTEST2: //BOOLEAN Test case 2(OR): 8b10001100|| 8b00010110 = 8b10011110
+      state.BOOLEANTEST2: //BOOLEAN Test case 2(OR): 8b10101100  & 8b10001100 = 8b10101100;
       alu.alufn = 6b11110; 
-      alu.a = 8b10001100;
-      alu.b = 8b00010110;
+      alu.a = 8b10101100;
+      alu.b = 8b10001100;
       out = alu.out; 
-      io_led[1] = 8b00010110;
-      io_led[0] = 8b10001100;  
+      io_led[0] = 8b10101100;
+      io_led[1] = 8b10001100;  
                 
       counter.d = counter.q+1;
-        if (counter.q[X] ==1&&out==8b10011110){
+        if (counter.q[X] ==1&&out==8b10101100){
           counter.d = 0;
           state.d = state.BOOLEANTEST3;
-        }else if (counter.q[X] == 1 && out!= 8b10011110){
+        }else if (counter.q[X] == 1 && out!= 8b10101100){
           counter.d=0;
           state.d=state.BOOLEANERROR;}
         
-      state.BOOLEANTEST3: //BOOLEAN Test case 3(XOR): 8b11110000 ^8b00110011 = 8b11000011
+      state.BOOLEANTEST3: //BOOLEAN Test case 3(XOR): 8b10101100 ^ 8b10001100 = 8b00100000;
       alu.alufn = 6b10110; 
-      alu.a = 8b11110000;
-      alu.b = 8b00110011;
+      alu.a = 8b10101100;
+      alu.b = 8b10001100;
       out = alu.out; 
-      io_led[1] = 8b00110011;
-      io_led[0] = 8b11110000;  
+      io_led[0] = 8b10101100;
+      io_led[1] = 8b10001100;  
                  
       counter.d = counter.q+1;
-        if (counter.q[X] ==1&&out==8b11000011){
+        if (counter.q[X] ==1&&out==8b00100000){
           counter.d = 0;
           state.d = state.BOOLEANTEST4;
-        }else if (counter.q[X] == 1 && out!= 8b11000011){
+        }else if (counter.q[X] == 1 && out!= 8b00100000){
           counter.d=0;
           state.d=state.BOOLEANERROR;}
         
-     state.BOOLEANTEST4: //BOOLEAN Test case 4("A"LDR): 8b11010100
+     state.BOOLEANTEST4: //BOOLEAN Test case 4("A"LDR): 8b10101100 (8b10001100)
       alu.alufn = 6b11010; 
-      alu.a = 8b11010100;
-      alu.b = 8b00110011;
+      alu.a = 8b10101100;
+      alu.b = 8b10001100;
       out = alu.out; 
-      io_led[1] = 8b00110011;
-      io_led[0] = 8b11010100; 
+      io_led[0] = 8b10101100;
+      io_led[1] = 8b10001100; 
                  
       counter.d = counter.q+1;
-        if (counter.q[X] ==1&&out==8b11010100){
+        if (counter.q[X] ==1&&out==8b10101100){
           counter.d = 0;
           state.d = state.SHIFTTEST1;
-        }else if (counter.q[X] == 1 && out!= 8b11010100){
+        }else if (counter.q[X] == 1 && out!= 8b10101100){
           counter.d=0;
           state.d=state.BOOLEANERROR;}
         
         
-      state.BOOLEANERRORTEST: //Simulated BOOLEAN error test case: 8b11010100 && 8b0 = 8b0 (+1)
+      state.BOOLEANERRORTEST: //Simulated BOOLEAN error test case: 8b10101100 && 8b00000000!=8b00000000
       alu.alufn = 6b11000; 
-      alu.a = 8b11010100;
+      alu.a = 8b10101100;
       alu.b = 8b00000000;
       out = alu.out+1; //inserting error
-      io_led[1] = 8b00110011;
-      io_led[0] = 8b0; 
+      io_led[0] = 8b10101100;
+      io_led[1] = 8b00000000;
               
       counter.d = counter.q+1;
         if (counter.q[X] ==1&&out==8b0){
@@ -282,67 +238,67 @@ module mojo_top (
           counter.d = 0;
           state.d = state.SHIFTTEST1;}       
         
-     state.SHIFTTEST1: //SHIFTER Test case 1(SHIFT LEFT): 8b1111 << 4 = 8b11110000
+     state.SHIFTTEST1: //SHIFTER Test case 1(SHIFT LEFT): 8b00001101 << 2 = 8b00110100;
       alu.alufn = 6b100000; 
-      alu.a = 8b1111;
-      alu.b = 8b100;
+      alu.a = 8b00001101;
+      alu.b = 8b10;
       out = alu.out; 
-      io_led[1] = 8b100;
-      io_led[0] = 8b1111; 
+      io_led[0] = 8b00001101;
+      io_led[1] = 8b10; 
                 
       counter.d = counter.q+1;
-        if (counter.q[X] ==1&&out==8b11110000){
+        if (counter.q[X] ==1&&out==8b00110100){
           counter.d = 0;
           state.d = state.SHIFTTEST3;
-        }else if (counter.q[X] == 1 && out!= 8b11110000){
+        }else if (counter.q[X] == 1 && out!= 8b00110100){
           counter.d=0;
           state.d=state.SHIFTERROR;}
           
-      state.SHIFTTEST2: //SHIFTER Test case 2(SHIFT RIGHT): 8b10110000 >> 2 = 8b101100
+      state.SHIFTTEST2: //SHIFTER Test case 2(SHIFT RIGHT): 8b00001101 >> 2 = 8b00000011;
       alu.alufn = 6b100001; 
-      alu.a = 8b10110000;
+      alu.a = 8b00001101;
       alu.b = 8b10;
       out = alu.out; 
-      io_led[1] = 8b10;
-      io_led[0] = 8b10110000; 
+      io_led[0] = 8b00001101;
+      io_led[1] = 8b10; 
                  
       counter.d = counter.q+1;
-        if (counter.q[X] ==1&&out==8b101100){
+        if (counter.q[X] ==1&&out==8b00000011){
           counter.d = 0;
           state.d = state.SHIFTTEST3;
-        }  else if (counter.q[X] == 1 && out!= 8b101100){
+        }  else if (counter.q[X] == 1 && out!= 8b00000011){
           counter.d=0;
           state.d=state.SHIFTERROR;}
         
-      state.SHIFTTEST3: //SHIFTER Test case 3(ARITHMETIC RIGHT SHIFT): 8b10110000 >>> 2 = 8b11101100
+      state.SHIFTTEST3: //SHIFTER Test case 3(ARITHMETIC RIGHT SHIFT): 8b10010000 >>> 2 = 8b11100100;
       alu.alufn = 6b100011; 
-      alu.a = 8b10110000;
+      alu.a = 8b10010000;
       alu.b = 8b10;
       out = alu.out; 
-      io_led[1] = 8b10;
-      io_led[0] = 8b10110000; 
+      io_led[0] = 8b10010000;
+      io_led[1] = 8b10; 
                 
       counter.d = counter.q+1;
-        if (counter.q[X] ==1&&out==8b11101100){
+        if (counter.q[X] ==1&&out==8b11100100){
           counter.d = 0;
           state.d = state.SHIFTERRORTEST;
-        }  else if (counter.q[X] == 1 && out!= 8b11101100){
+        }  else if (counter.q[X] == 1 && out!= 8b11100100){
           counter.d=0;
           state.d=state.SHIFTERROR;}
           
-      state.SHIFTERRORTEST: //SHIFTER error test case : 8b01101000 >>> 2 = 8b00011010 (+1)
+      state.SHIFTERRORTEST: //SHIFTER error test case : 8b00001101 >>> 2 != 8b00001101 
       alu.alufn = 6b100001; 
-      alu.a = 8b01101000;
+      alu.a = 8b00001101;
       alu.b = 8b10;
       out = alu.out+1; 
-      io_led[1] = 8b10;
-      io_led[0] = 8b01101000; 
+      io_led[0] = 8b00001101;
+      io_led[1] = 8b10; 
                 
       counter.d = counter.q+1;
-        if (counter.q[X] ==1&&out==8b00011010){
+        if (counter.q[X] ==1&&out==8b00001101){
           counter.d = 0;
           state.d = state.SHIFTERRORTEST;
-        }  else if (counter.q[X] == 1 && out!= 8b00011010){
+        }  else if (counter.q[X] == 1 && out!= 8b00001101){
           counter.d=0;
           state.d=state.SHIFTERROR;}
                         
@@ -356,13 +312,13 @@ module mojo_top (
         
         
 
-      state.COMPTEST1: //COMP Test case 1(CMPEQ): 8b10110100 == 8b10110100?, result = 8b1
+      state.COMPTEST1: //COMP Test case 1(CMPEQ): 8b11110100 == 8b11110100 
       alu.alufn = 6b110011; 
-      alu.a = 8b10110100;
-      alu.b = 8b10110100;
+      alu.a = 8b11110100;
+      alu.b = 8b11110100;
       out = alu.out; 
-      io_led[1] = 8b10110100;
-      io_led[0] = 8b10110100; 
+      io_led[0] = 8b11110100;
+      io_led[1] = 8b11110100; 
                  
       counter.d = counter.q+1;
         if (counter.q[X] ==1&&out==8b1){
@@ -372,13 +328,13 @@ module mojo_top (
           counter.d=0;
           state.d=state.COMPERROR;}  
         
-      state.COMPTEST2: //COMP Test case 2(CMPEQ): 8b10110100 == 8b10110101?, result = 8b0
+      state.COMPTEST2: //COMP Test case 2(CMPEQ): 8b11110100 != 8b11110101
       alu.alufn = 6b110011; 
-      alu.a = 8b10110100;
-      alu.b = 8b10110101;
+      alu.a = 8b11110100;
+      alu.b = 8b11110101;
       out= alu.out; 
-      io_led[1] = 8b10110101;
-      io_led[0] = 8b10110100; 
+      io_led[0] = 8b11110101;
+      io_led[1] = 8b11110100; 
                 
       counter.d = counter.q+1;
         if (counter.q[X] ==1&&out==8b0){
@@ -388,13 +344,13 @@ module mojo_top (
           counter.d=0;
           state.d=state.COMPERROR;}            
         
-      state.COMPTEST3: //COMP Test case 3(CMPLT): 8b10110100 < 8b10110101?, result = 8b1
+      state.COMPTEST3: //COMP Test case 3(CMPLT): 8b11110100 < 8b11110101
       alu.alufn = 6b110101; 
-      alu.a = 8b10110100;
-      alu.b = 8b10110101;
+      alu.a = 8b11110100;
+      alu.b = 8b11110101;
       out = alu.out; 
-      io_led[1] = 8b10110101;
-      io_led[0] = 8b10110100; 
+      io_led[0] = 8b11110100;
+      io_led[1] = 8b11110101; 
                   
       counter.d = counter.q+1;
         if (counter.q[X] ==1&&out==8b1){
@@ -404,13 +360,13 @@ module mojo_top (
           counter.d=0;
           state.d=state.COMPERROR;}                      
             
-      state.COMPTEST4: //COMP Test case 4(CMPLT): 8b10001 < 8b11?, result = 8b0
+      state.COMPTEST4: //COMP Test case 4(CMPLT): 8b10001 !< 8b1010;
       alu.alufn = 6b110101; 
       alu.a = 8b10001;
-      alu.b = 8b11;
+      alu.b = 8b1010;
       out = alu.out; 
-      io_led[1] = 8b11;
-      io_led[0] = 8b10001; 
+      io_led[0] = 8b10001;
+      io_led[1] = 8b1010; 
                  
       counter.d = counter.q+1;
         if (counter.q[X] ==1&&out==8b0){
@@ -420,13 +376,13 @@ module mojo_top (
           counter.d=0;
           state.d=state.COMPERROR;}                                   
         
-      state.COMPTEST5: //COMP Test case 5(CMPLE): 8b1001 <= 8b1001?, result = 8b1
+      state.COMPTEST5: //COMP Test case 5(CMPLE): 8b1000 < 8b1001
       alu.alufn = 6b110111; 
-      alu.a = 8b1001;
+      alu.a = 8b1000;
       alu.b = 8b1001;
       out= alu.out;     
-      io_led[1] = 8b1001;
-      io_led[0] = 8b1001; 
+      io_led[0] = 8b1000;
+      io_led[1] = 8b1001; 
             
       counter.d = counter.q+1;
         if (counter.q[X] ==1&&out==8b1){
@@ -436,30 +392,15 @@ module mojo_top (
           counter.d=0;
           state.d=state.COMPERROR;}            
         
-      state.COMPTEST6: //COMP Test case 6(CMPLE): 8b1011 <= 8b1101?, result = 8b1
-      alu.alufn = 6b110111; 
-      alu.a = 8b1011;
-      alu.b = 8b1101;
-      out = alu.out; 
-      io_led[1] = 8b1101;
-      io_led[0] = 8b1011; 
-                
-      counter.d = counter.q+1;
-        if (counter.q[X] ==1&&out==8b1){
-          counter.d = 0;
-          state.d = state.COMPTEST7;
-        }else if (counter.q[X] == 1 && out!= 8b1){
-          counter.d=0;
-          state.d=state.COMPERROR;}           
         
         
-      state.COMPTEST7: //COMP Test case 6(CMPLE): 8b111 <= 8b1110?, result = 8b0
+      state.COMPTEST6: //COMP Test case 6(CMPLE): 8b1111 !< 8b1100;
       alu.alufn = 6b110111; 
-      alu.a = 8b111;
-      alu.b = 8b1110;
+      alu.a = 8b1111;
+      alu.b = 8b1100;
       out = alu.out; 
-      io_led[1] = 8b1110;
-      io_led[0] = 8b111; 
+      io_led[0] = 8b1111;
+      io_led[1] = 8b1100; 
                
       counter.d = counter.q+1;
         if (counter.q[X] ==1&&out==8b0){
@@ -470,11 +411,11 @@ module mojo_top (
           state.d=state.COMPERROR;} 
             
           
-      state.COMPERRORTEST: //COMP error test case ): 8b1111 == 8b1111?, result = 8b1
+      state.COMPERRORTEST: //COMP error test case ): 8b1111 != 8b1111;
       alu.alufn = 6b110011; 
       alu.a = 8b1111;
       alu.b = 8b1111;
-      out = alu.out+1; 
+      out = alu.out-1; 
       io_led[1] = 8b1111;
       io_led[0] = 8b1111; 
                

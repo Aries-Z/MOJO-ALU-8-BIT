@@ -1,22 +1,24 @@
 module boolean (
-    input a[8], // clock
-    input b[8],// reset
-    input mux[4],
-    output out[8]
+    input a[8], //input an 8-bit number a;
+    input b[8],//input an 8-bit number b;
+    input mux[4],//input a 4-bit number mux;
+    output out[8] //output an 8-bit number out;
   ) {
 
   always {
   
-    out=24h00;
+    out=8h00;
     case(mux){
-    14:out=a|b;
-    6: out=a^b;
-    8:out=a&b;
-    10:out=a;
-    0:out = a~^b;//XNOR GATE
-    default:out=0;}
+    14:out=a|b; //if mux=14(4b1110),output is a or b;
+    6: out=a^b; //if mux=6(4b0110),output is a xor b;
+    8:out=a&b; //if mux=8(4b1000),output is a and b;
+    10:out=a; //if mux=10(4b1010),output is a;
+    0:out = a~^b;//if mux=0(4b0000),output is a xnor b;
+    default:out=0;//in other cases, output is all 0;
+      }
  
 
+    
     
     
   }

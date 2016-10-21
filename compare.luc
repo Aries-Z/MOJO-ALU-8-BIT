@@ -1,8 +1,8 @@
 module compare (
-    input a[8], // clock
-    input b[8],// reset
-    input mux[2],
-    output out[8]
+    input a[8], //input an 8-bit number a;
+    input b[8],//input an 8-bit number b;
+    input mux[2],//input a 2-bit number mux;
+    output out[8] //output an 8-bit number out;
   ) {
 
   always {
@@ -10,17 +10,19 @@ module compare (
     0: if(a==b)
       out[0]=1;
      else
-      out[0]=0;
-    1:if(a<b)
+      out[0]=0; // if mux=0(2b00), if a=b,output=1;else output=0;
+          
+        
+    2:if(a<b)
       out[0]=1;
      else
-      out[0]=0;
+      out[0]=0; // if mux=2(2b10), if a<b,output=1;else output=0;
         
-    2:if(a>b)
+    3:if(a<=b)
     out[0]=1;
      else
-    out[0]=1;
-    default:out=0;
+    out[0]=0;
+    default:out=0; // if mux=3(2b11), if a<=b,output=1;else output=0;
       }
     
     

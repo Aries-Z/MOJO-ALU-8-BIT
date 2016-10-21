@@ -1,46 +1,46 @@
 module alu (
-    input a[8],// clock
-    input b[8],  // reset
-    input alufn[6],
-    output out[8]
+    input a[8],//input an 8-bit number ;
+    input b[8],  // input a 8-bit number;
+    input alufn[6], // input alufn number;
+    output out[8] // output the result;
     
   ) {
-  adder adder2;
-  boolean boolean;
-  compare compare;
-  shift shift;
+  adder adder; //create adder module;
+  boolean boolean; // create boolean module;
+  compare compare; //create compare module;
+  shift shift; //create shift module;
   
-  sig mux2[2];
-  sig result[8];
+  sig mux2[2]; //create a 2-bit signal;
+  sig result[8]; //creat an 8-bit signal;
   
   
   always {
-    mux2=alufn[5:4];
+    mux2=alufn[5:4]; //assign mux2 = alu[5:4];
     
-     adder2.a=a;
-     adder2.b=b;
-     adder2.mux=alufn[1:0];
+     adder.a=a; //input a of adder = a;
+     adder.b=b; //input b of adder = b;
+     adder.mux=alufn[1:0]; //input mux of adder = alufn[1:0];
     
-     boolean.a=a;
-     boolean.b=b;
-     boolean.mux=alufn[3:0];
+     boolean.a=a; //input a of boolean = a;
+     boolean.b=b; //input b of boolean = b;
+     boolean.mux=alufn[3:0]; //input mux of boolean = alufn[3:0];
     
-     shift.a=a;
-     shift.b=b;
-     shift.mux=alufn[1:0];
+     shift.a=a; //input a of shift = a;
+     shift.b=b; //input b of shift = b;
+     shift.mux=alufn[1:0]; //input mux of shift = alufn[1:0];
     
-     compare.a=a;
-     compare.b=b;
-     compare.mux=alufn[2:1];
+     compare.a=a; //input a of compare = a;
+     compare.b=b; //input b of compare = a;
+     compare.mux=alufn[2:1]; //input mux of compare = alufn[2:1];
     
  
     
     case(mux2){
-      0:result=adder2.out; 
-      1:result=boolean.out; 
-      2:result=shift.out; 
-      3:result=compare.out; 
-      default:result=b0;
+      0:result=adder.out;  //if mux=0(2b00),result is the output of adder module;
+      1:result=boolean.out; //if mux=1(2b01),result is the output of boolean module;
+      2:result=shift.out; //if mux=2(2b10),result is the output of shift module;
+      3:result=compare.out; //if mux=3(2b11),result is the output of compare module;
+      default:result=b0; //in other cases, result is 0;
         }
     
     

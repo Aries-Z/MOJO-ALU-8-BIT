@@ -1,39 +1,39 @@
 module adder (
-    input a[8], // clock
-    input b[8],
-    input mux[2],
-    output out[8],
-    output z,
-    output v,
-    output n
+    input a[8], //input an 8-bit number a;
+    input b[8], //input an 8-bit number b;
+    input mux[2], //input a 2-bit number mux;
+    output out[8], //output an 8-bit number out;
+    output z, //output z;
+    output v,//output v;
+    output n //out put n;
   )
   
   
    {
-      sig result[8];
-      sig xb[8];
+      sig result[8]; //define an 8-bit signal result;
+      sig xb[8]; //define an 8-bit signal xb;
   
   always {
     case(mux){
-      0:result=a+b;xb=b; //add
-      2:result=a-b;xb=b^1; //substract
-      1:result=a*b;xb=b; //multiply
-      default:result=0;xb=b;
+      0:result=a+b;xb=b; //if mux=0(2b00),result = a add b; xb=b;
+      2:result=a-b;xb=b^1; //if mux=1(2b01),result = a substract b; xb is two¡¯s complement negation of b;
+      1:result=a*b;xb=b; //if mux=2(2b10),result = a multiply b ;xb=b;
+      default:result=0;xb=b; // in other cases, result=0;xb=b;
     }
       
-    out=result;
+    out=result; //output of adder is result;
     
-    if(result==24h00)
+    if(result==8h00)
         z=1;
     else
-    z=0;
+    z=0; //if result is 0, z=1
       
     if(result[7]==1)
     n=1;
      else
-    n=0;
+    n=0;// if result is negative(result[7]=1),n=1;
       
-    v=(a[7]&xb[7]&(1-result[7]))|((1-a[7])&(1-b[7])&(result[7]));
+    v=(a[7]&xb[7]&(1-result[7]))|((1-a[7])&(1-b[7])&(result[7])); //v is true when the addition operation overflow;
     
 }
 
