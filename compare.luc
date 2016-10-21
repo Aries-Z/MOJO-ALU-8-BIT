@@ -1,0 +1,35 @@
+module compare (
+    input a[8], // clock
+    input b[8],// reset
+    input mux[2],
+    output out[8]
+  ) {
+
+  always {
+    case(mux){
+    0: if(a==b)
+      out[0]=1;
+     else
+      out[0]=0;
+    1:if(a<b)
+      out[0]=1;
+     else
+      out[0]=0;
+        
+    2:if(a>b)
+    out[0]=1;
+     else
+    out[0]=1;
+    default:out=0;
+      }
+    
+    
+   
+   
+      
+  
+
+  
+        
+  }
+}

@@ -1,0 +1,23 @@
+module boolean (
+    input a[8], // clock
+    input b[8],// reset
+    input mux[4],
+    output out[8]
+  ) {
+
+  always {
+  
+    out=24h00;
+    case(mux){
+    14:out=a|b;
+    6: out=a^b;
+    8:out=a&b;
+    10:out=a;
+    0:out = a~^b;//XNOR GATE
+    default:out=0;}
+ 
+
+    
+    
+  }
+}

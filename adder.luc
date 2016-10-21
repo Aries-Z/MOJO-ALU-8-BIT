@@ -1,0 +1,41 @@
+module adder (
+    input a[8], // clock
+    input b[8],
+    input mux[2],
+    output out[8],
+    output z,
+    output v,
+    output n
+  )
+  
+  
+   {
+      sig result[8];
+      sig xb[8];
+  
+  always {
+    case(mux){
+      0:result=a+b;xb=b; //add
+      2:result=a-b;xb=b^1; //substract
+      1:result=a*b;xb=b; //multiply
+      default:result=0;xb=b;
+    }
+      
+    out=result;
+    
+    if(result==24h00)
+        z=1;
+    else
+    z=0;
+      
+    if(result[7]==1)
+    n=1;
+     else
+    n=0;
+      
+    v=(a[7]&xb[7]&(1-result[7]))|((1-a[7])&(1-b[7])&(result[7]));
+    
+}
+
+
+}

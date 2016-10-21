@@ -1,0 +1,13 @@
+module sra (
+    input a[8],
+    input b[8],
+    output out[8]
+  ) {
+
+  sig mux[3];
+  
+  always {
+    mux=b[2:0];
+    out[7:0]=a>>>mux; //ARITHMATIC SHIFT RIGHT
+  }
+  }

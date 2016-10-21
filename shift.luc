@@ -1,0 +1,35 @@
+module shift (
+    input a[8],
+    input b[8],
+    input mux[2],
+    output out[8]
+  ) {
+  shl shl;
+  shr shr;
+  sra sra;
+  sig result[8];
+  
+  always {
+    result=24h00;
+    
+    shl.a=a;
+    shl.b=b;
+    
+    shr.a=a;
+    shr.b=b;
+    
+    sra.a=a;
+    sra.b=b;
+    
+    
+    case(mux){
+      0:result=shl.out;
+      1:result=shr.out;
+      2:result=sra.out;
+      default:result=0;}
+  
+      
+    out=result;
+      
+  }
+}

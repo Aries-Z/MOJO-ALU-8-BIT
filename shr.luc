@@ -1,0 +1,12 @@
+module shr (
+    input a[8],
+    input b[8],
+    output out[8]
+  ) {
+
+  sig mux[3];
+  
+  always {
+    mux=b[2:0];
+    out=a>>mux; //SHIFT RIGHT
+  }}

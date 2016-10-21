@@ -1,0 +1,52 @@
+module alu (
+    input a[8],// clock
+    input b[8],  // reset
+    input alufn[6],
+    output out[8]
+    
+  ) {
+  adder adder2;
+  boolean boolean;
+  compare compare;
+  shift shift;
+  
+  sig mux2[2];
+  sig result[8];
+  
+  
+  always {
+    mux2=alufn[5:4];
+    
+     adder2.a=a;
+     adder2.b=b;
+     adder2.mux=alufn[1:0];
+    
+     boolean.a=a;
+     boolean.b=b;
+     boolean.mux=alufn[3:0];
+    
+     shift.a=a;
+     shift.b=b;
+     shift.mux=alufn[1:0];
+    
+     compare.a=a;
+     compare.b=b;
+     compare.mux=alufn[2:1];
+    
+ 
+    
+    case(mux2){
+      0:result=adder2.out; 
+      1:result=boolean.out; 
+      2:result=shift.out; 
+      3:result=compare.out; 
+      default:result=b0;
+        }
+    
+    
+    
+    
+    
+    out=result;
+  }
+}
